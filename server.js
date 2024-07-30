@@ -6,9 +6,27 @@ const {
 	UnauthorizedError,
 	ForbiddenError,
 } = require("./src/errors");
+const authorization = require("./src/middlewares/authorization");
 const config = require("./src/config");
 
 const app = express();
+
+app.use((req, res, next) => {
+	req.user = { roles: ["user"] };
+	next();
+});
+
+app.get("/admin", authorization(["admin"]), (req, res) => {
+	res.send("Welcome, Admin!");
+});
+
+app.get("/user", authorization(["user"]), (req, res) => {
+	res.send("Welcome, User!");
+});
+
+app.get("/any", authorization(["admin", "user"]), (req, res) => {
+	res.send("Welcome, Admin or User!");
+});
 
 app.get("/validation-error", (req, res, next) => {
 	try {
